@@ -1,0 +1,14 @@
+%%{init: {"gitGraph": {"rotateCommitLabel": false, "mainBranchName": "main"}}}%%
+gitGraph
+  commit id: "skeleton"
+  branch feature/physics
+  checkout feature/physics
+  commit id: "transformer"
+  commit id: "tests"
+  checkout main
+  merge feature/physics tag: "v0.2.0"
+  branch fix/env-clash
+  checkout fix/env-clash
+  commit id: "reserve PM_*"
+  checkout main
+  merge fix/env-clash tag: "v0.3.0"

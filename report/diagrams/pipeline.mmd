@@ -1,0 +1,33 @@
+flowchart LR
+  subgraph DATA["Data stages"]
+    direction TB
+    SRC[("UCI AI4I zip<br/>(plant: weekly extract)")]
+    I["1 Ingest - stage_ingest()<br/>download if missing,<br/>verify sha256"]
+    V["2 Validate - stage_validate()<br/>GATE: 0 blocking errors"]:::gate
+    P["3 Preprocess - stage_preprocess()<br/>drop IDs + 5 mode flags,<br/>time-ordered split 80 / 20"]
+    F["4 Features - stage_features()<br/>GATE: finite, physically valid"]:::gate
+    SRC --> I
+    I -- "raw CSV + sha256" --> V
+    V -- "validation_report.json" --> P
+    P -- "dev 8,000 / test 2,000 (parquet)" --> F
+  end
+  subgraph MODEL["Model stages - one MLflow run per configuration"]
+    direction TB
+    T["5 Train (x14)<br/>5-fold stratified CV,<br/>resampling inside folds,<br/>refit on all dev cycles"]
+    E["6 Evaluate<br/>threshold = top 5 % of OOF,<br/>CV + holdout, CI, slices"]
+    G["7 Select + GATES<br/>recall@5 % >= 0.70,<br/>+0.10 over rule"]:::gate
+    R["Register<br/>version, tags,<br/>alias champion"]
+    K["Keep champion,<br/>alert ML team"]
+    D["8 Deploy smoke test<br/>load new version<br/>by alias, score holdout"]
+    MLF[("MLflow tracking<br/>params, metrics,<br/>artifacts, model")]
+    REG[("Model registry<br/>ai4i-failure-risk")]
+    T -- "OOF scores, fitted Pipeline" --> E
+    E -.-> MLF
+    E --> G
+    G -- pass --> R
+    G -- fail --> K
+    R -.-> REG
+    R --> D
+  end
+  DATA -- "dev/test parquet + feature_profile.json" --> MODEL
+  classDef gate fill:#fff4e5,stroke:#d9822b,stroke-width:1.5px

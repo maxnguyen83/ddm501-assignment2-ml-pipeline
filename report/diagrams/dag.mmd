@@ -1,0 +1,15 @@
+flowchart TB
+  ingest["ingest"] --> validate["validate<br/>(AirflowFailException on bad data)"]:::gate
+  ingest --> preprocess
+  validate --> preprocess["preprocess"]
+  preprocess --> build_features["build_features"]
+  list_experiments["list_experiments<br/>(reads experiments.yaml)"] --> train
+  build_features --> train["train_candidate<br/>dynamic task mapping: 14 mapped instances,<br/>max 4 in parallel"]
+  preprocess --> train
+  train --> results_table["results_table<br/>(writes experiment_results.md)"]
+  train --> register["select_and_register<br/>SLA 2 h; skip if gates fail"]:::gate
+  register --> smoke["smoke_test_champion<br/>(load new version by alias,<br/>check alert rate)"]
+  preprocess --> smoke
+  classDef gate fill:#fff4e5,stroke:#d9822b,stroke-width:1.5px
+  classDef mapped fill:#e8f1fb,stroke:#2a78d6,stroke-width:1.5px
+  class train mapped
