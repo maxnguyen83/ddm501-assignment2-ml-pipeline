@@ -1,0 +1,63 @@
+# airflow dags test pm_failure_risk_training 2026-10-05
+# image: pm-pipeline-airflow:2.8.4 (docker/airflow.Dockerfile, Airflow 2.8.4, Python 3.11.8)
+# key lines extracted from the task log (ANSI colours removed)
+--- task: ingest
+Done. Returned value was: {'raw_path': '/opt/airflow/project/data/raw/ai4i2020.csv', 'sha256': 'dc6630cd9b1f0f853922fad78a1b6436570d3f1ec863f1dd5c4340ac56bc8a8e', 'n_bytes': 522048}
+--- task: list_experiments
+Done. Returned value was: ['E01_rule_toolwear', 'E02_logreg_raw', 'E03_logreg_raw_cw', 'E04_logreg_physics_cw', 'E05_rf_raw', 'E06_rf_raw_cw', 'E07_rf_physics_cw', 'E08_rf_physics_under', 'E09_hgb_raw', 'E10_hgb_physics', 'E11_hgb_physics_cw', 'E12_lgbm_physics', 'E13_lgbm_physics_over', 'E14_lgbm_raw_cw']
+--- task: validate
+Done. Returned value was: {'report_path': '/work/interim/airflow_20261005T000000/validation_report.json', 'n_rows': 10000, 'failure_rate': 0.0339, 'n_failures': 339, 'mode_counts': {'twf': 46, 'hdf': 115, 'pwf': 95, 'osf': 98, 'rnf': 19}, 'type_share': {'L': 0.6, 'M': 0.2997, 'H': 0.1003}, 'fail_without_mode': 9, 'mode_without_fail': 18}
+--- task: preprocess
+Done. Returned value was: {'dev_path': '/work/interim/airflow_20261005T000000/dev.parquet', 'test_path': '/work/interim/airflow_20261005T000000/test.parquet', 'n_dev': 8000, 'n_test': 2000, 'dev_failure_rate': 0.0375, 'test_failure_rate': 0.0195}
+--- task: build_features
+Done. Returned value was: {'profile_path': '/work/interim/airflow_20261005T000000/feature_profile.json', 'n_features': 8}
+--- task: train_candidate
+2026-10-03 02:48:26,275 INFO pm_pipeline.pipeline: E04_logreg_physics_cw: cv recall@budget=0.553 test recall@budget=0.641
+Done. Returned value was: {'run_id': '8d581c6cc9624b639aa32ab6ebe85dd3', 'name': 'E04_logreg_physics_cw', 'cv_recall_at_budget': 0.5533333333333333, 'cv_pr_auc': 0.45939211773984534, 'test_recall_at_budget': 0.6410256410256411}
+--- task: train_candidate
+2026-10-03 02:48:29,008 INFO pm_pipeline.pipeline: E10_hgb_physics: cv recall@budget=0.883 test recall@budget=0.744
+Done. Returned value was: {'run_id': '5fa6d7b0995f479299d312e0d74ba392', 'name': 'E10_hgb_physics', 'cv_recall_at_budget': 0.8833333333333333, 'cv_pr_auc': 0.8981130801222778, 'test_recall_at_budget': 0.7435897435897436}
+--- task: train_candidate
+2026-10-03 02:48:36,693 INFO pm_pipeline.pipeline: E07_rf_physics_cw: cv recall@budget=0.890 test recall@budget=0.795
+Done. Returned value was: {'run_id': '3844f5edbd10431b9a0fb60da5f2ad7e', 'name': 'E07_rf_physics_cw', 'cv_recall_at_budget': 0.89, 'cv_pr_auc': 0.9010551306169328, 'test_recall_at_budget': 0.7948717948717948}
+--- task: train_candidate
+2026-10-03 02:48:38,864 INFO pm_pipeline.pipeline: E13_lgbm_physics_over: cv recall@budget=0.883 test recall@budget=0.821
+Done. Returned value was: {'run_id': '5131409a7d8a459589c9c99df4858a0f', 'name': 'E13_lgbm_physics_over', 'cv_recall_at_budget': 0.8833333333333333, 'cv_pr_auc': 0.9067065280711698, 'test_recall_at_budget': 0.8205128205128205}
+--- task: train_candidate
+2026-10-03 02:48:40,616 INFO pm_pipeline.pipeline: E03_logreg_raw_cw: cv recall@budget=0.520 test recall@budget=0.667
+Done. Returned value was: {'run_id': 'd86004e78424442e9144d80f598ea9c2', 'name': 'E03_logreg_raw_cw', 'cv_recall_at_budget': 0.52, 'cv_pr_auc': 0.4294400672564144, 'test_recall_at_budget': 0.6666666666666666}
+--- task: train_candidate
+2026-10-03 02:48:46,308 INFO pm_pipeline.pipeline: E06_rf_raw_cw: cv recall@budget=0.790 test recall@budget=0.769
+Done. Returned value was: {'run_id': 'c82318cea95d40d094096f3f184e76f9', 'name': 'E06_rf_raw_cw', 'cv_recall_at_budget': 0.79, 'cv_pr_auc': 0.7650116837242327, 'test_recall_at_budget': 0.7692307692307693}
+--- task: train_candidate
+2026-10-03 02:48:48,307 INFO pm_pipeline.pipeline: E12_lgbm_physics: cv recall@budget=0.887 test recall@budget=0.821
+Done. Returned value was: {'run_id': 'be2be7f5dbbe49de9a0b445ab7b93d2d', 'name': 'E12_lgbm_physics', 'cv_recall_at_budget': 0.8866666666666667, 'cv_pr_auc': 0.9070648419335648, 'test_recall_at_budget': 0.8205128205128205}
+--- task: train_candidate
+2026-10-03 02:48:51,864 INFO pm_pipeline.pipeline: E09_hgb_raw: cv recall@budget=0.840 test recall@budget=0.795
+Done. Returned value was: {'run_id': '0d8323717f764905959dd2e06a7fadca', 'name': 'E09_hgb_raw', 'cv_recall_at_budget': 0.84, 'cv_pr_auc': 0.8167770870316324, 'test_recall_at_budget': 0.7948717948717948}
+--- task: train_candidate
+2026-10-03 02:48:56,504 INFO pm_pipeline.pipeline: E05_rf_raw: cv recall@budget=0.827 test recall@budget=0.821
+Done. Returned value was: {'run_id': '3a3174edc4694a6ab54e93e485eededb', 'name': 'E05_rf_raw', 'cv_recall_at_budget': 0.8266666666666667, 'cv_pr_auc': 0.8031466275697634, 'test_recall_at_budget': 0.8205128205128205}
+--- task: train_candidate
+2026-10-03 02:48:58,381 INFO pm_pipeline.pipeline: E02_logreg_raw: cv recall@budget=0.550 test recall@budget=0.641
+Done. Returned value was: {'run_id': '881a6a1dbaac4840ba2b0dde56e934af', 'name': 'E02_logreg_raw', 'cv_recall_at_budget': 0.55, 'cv_pr_auc': 0.4515650252724673, 'test_recall_at_budget': 0.6410256410256411}
+--- task: train_candidate
+2026-10-03 02:49:03,138 INFO pm_pipeline.pipeline: E08_rf_physics_under: cv recall@budget=0.890 test recall@budget=0.821
+Done. Returned value was: {'run_id': '702e27c144e74da69b6b91356c4ad89c', 'name': 'E08_rf_physics_under', 'cv_recall_at_budget': 0.89, 'cv_pr_auc': 0.8748319315673231, 'test_recall_at_budget': 0.8205128205128205}
+--- task: train_candidate
+2026-10-03 02:49:07,664 INFO pm_pipeline.pipeline: E11_hgb_physics_cw: cv recall@budget=0.887 test recall@budget=0.769
+Done. Returned value was: {'run_id': '3deebc9a03a34e2cba047fd63bfe13bb', 'name': 'E11_hgb_physics_cw', 'cv_recall_at_budget': 0.8866666666666667, 'cv_pr_auc': 0.907329391177478, 'test_recall_at_budget': 0.7692307692307693}
+--- task: train_candidate
+2026-10-03 02:49:08,152 INFO pm_pipeline.pipeline: E01_rule_toolwear: cv recall@budget=0.220 test recall@budget=0.641
+Done. Returned value was: {'run_id': 'ad0302f2abaf446193ef10bc63dc38e7', 'name': 'E01_rule_toolwear', 'cv_recall_at_budget': 0.22, 'cv_pr_auc': 0.11882429172968646, 'test_recall_at_budget': 0.6410256410256411}
+--- task: train_candidate
+2026-10-03 02:49:09,873 INFO pm_pipeline.pipeline: E14_lgbm_raw_cw: cv recall@budget=0.830 test recall@budget=0.769
+Done. Returned value was: {'run_id': 'a57f7592025042ec81c85606a71d3114', 'name': 'E14_lgbm_raw_cw', 'cv_recall_at_budget': 0.83, 'cv_pr_auc': 0.8031042366390352, 'test_recall_at_budget': 0.7692307692307693}
+--- task: results_table
+Done. Returned value was: /work/interim/airflow_20261005T000000/experiment_results.md
+--- task: select_and_register
+Created version '1' of model 'ai4i-failure-risk'.
+Done. Returned value was: {'selection': {'run_id': '3deebc9a03a34e2cba047fd63bfe13bb', 'run_name': 'E11_hgb_physics_cw', 'value': 0.8866666666666667, 'baseline_value': 0.22, 'gate_failures': []}, 'registered': True, 'model_name': 'ai4i-failure-risk', 'version': '1', 'alias': 'champion'}
+--- task: smoke_test_champion
+Done. Returned value was: {'version': '1', 'alert_rate': 0.0295}
+EXIT=0

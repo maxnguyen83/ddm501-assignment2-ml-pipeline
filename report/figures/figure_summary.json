@@ -1,0 +1,27 @@
+{
+  "selected": "E11_hgb_physics_cw",
+  "selected_run_id": "0bc031a8cfee4d7085fca2464f321662",
+  "budget_curve_points": {
+    "E01_rule_toolwear": {
+      "budget_3pct_recall": 0.15333333333333332,
+      "budget_5pct_recall": 0.22,
+      "budget_8pct_recall": 0.31333333333333335
+    },
+    "E02_logreg_raw": {
+      "budget_3pct_recall": 0.42,
+      "budget_5pct_recall": 0.55,
+      "budget_8pct_recall": 0.6366666666666667
+    },
+    "E05_rf_raw": {
+      "budget_3pct_recall": 0.6633333333333333,
+      "budget_5pct_recall": 0.8233333333333334,
+      "budget_8pct_recall": 0.8966666666666666
+    },
+    "E11_hgb_physics_cw": {
+      "budget_3pct_recall": 0.7966666666666666,
+      "budget_5pct_recall": 0.8866666666666667,
+      "budget_8pct_recall": 0.91
+    }
+  },
+  "no_model_cost_per_1000_dev": 15000.0
+}

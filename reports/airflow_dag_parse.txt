@@ -1,0 +1,11 @@
+airflow 2.8.4 | import_errors: {}
+dag: pm_failure_risk_training | schedule: 0 2 * * 1 | tz: Asia/Ho_Chi_Minh | catchup: False | max_active_runs: 1
+  ingest                 retries=2 sla=None upstream=[]
+  validate               retries=2 sla=None upstream=['ingest']
+  preprocess             retries=2 sla=None upstream=['ingest', 'validate']
+  build_features         retries=2 sla=None upstream=['preprocess']
+  list_experiments       retries=2 sla=None upstream=[]
+  train_candidate        retries=2 sla=None upstream=['build_features', 'ingest', 'list_experiments', 'preprocess']
+  results_table          retries=2 sla=None upstream=['train_candidate']
+  select_and_register    retries=2 sla=2:00:00 upstream=['train_candidate']
+  smoke_test_champion    retries=2 sla=None upstream=['preprocess', 'select_and_register']
