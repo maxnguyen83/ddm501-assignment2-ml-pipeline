@@ -1,0 +1,68 @@
+# Pipeline configuration for the AI4I 2020 failure-risk model.
+# Every key can be overridden with an environment variable: prefix PM_, nested keys joined
+# with a double underscore, e.g. PM_EVALUATION__ALERT_BUDGET=0.03 or
+# PM_TRACKING__TRACKING_URI=http://mlflow:5000. Values are parsed as YAML scalars.
+
+seed: 42
+
+data:
+  raw_path: data/raw/ai4i2020.csv
+  source_url: https://archive.ics.uci.edu/static/public/601/ai4i+2020+predictive+maintenance+dataset.zip
+  # sha256 of the CSV as published by UCI (dataset id 601). Ingest refuses a file that differs.
+  expected_sha256: dc6630cd9b1f0f853922fad78a1b6436570d3f1ec863f1dd5c4340ac56bc8a8e
+  work_dir: data/interim
+
+validation:
+  min_rows: 5000
+  # Plausible physical ranges; anything outside is treated as a sensor fault, not a failure.
+  ranges:
+    air_temp_k: [290.0, 310.0]
+    process_temp_k: [300.0, 320.0]
+    rotational_speed_rpm: [1000, 3000]
+    torque_nm: [0.0, 100.0]
+    tool_wear_min: [0, 300]
+  allowed_types: [L, M, H]
+  # Sanity band for the label rate; outside the band usually means a broken label join.
+  failure_rate_band: [0.01, 0.10]
+
+split:
+  # Rows are ordered by UDI (production sequence). The last 20 % is a time-ordered holdout.
+  test_fraction: 0.20
+  cv_folds: 5
+
+evaluation:
+  # Maintenance capacity: technicians can inspect at most 5 % of production cycles.
+  alert_budget: 0.05
+  bootstrap_rounds: 500
+  # Cost per cycle outcome in USD, 1 USD ~ 25,000 VND (assumptions, see report 2.2).
+  costs:
+    false_negative: 400.0    # unplanned stop: lost output, scrapped part, tool, overtime
+    true_positive: 100.0     # planned intervention: tool change or cool-down at a set time
+    false_positive: 40.0     # unnecessary inspection: technician time + short stop
+    true_negative: 0.0
+  # Machine downtime in hours per outcome (assumptions; the plant's headline KPI).
+  downtime_hours:
+    false_negative: 1.8      # diagnose, fetch parts, repair, re-qualify first part
+    true_positive: 0.4       # planned stop, usually moved to the job change
+    false_positive: 0.25     # inspection stop that finds nothing
+    true_negative: 0.0
+
+tracking:
+  tracking_uri: sqlite:///mlflow.db
+  experiment_name: ai4i-failure-risk
+  artifact_location: mlartifacts
+
+registry:
+  model_name: ai4i-failure-risk
+  primary_metric: cv_recall_at_budget
+  # Candidates within this distance of the best primary metric are treated as tied
+  # (0.01 = 3 failures out of 300 in CV, well inside the bootstrap CI). Among those the
+  # highest CV PR-AUC wins (deterministic for a fixed seed); latency breaks exact ties.
+  selection_tolerance: 0.01
+  # Quality gates a candidate must pass before it is registered.
+  min_primary_metric: 0.70
+  min_lift_over_baseline: 0.10
+  baseline_run_name: E01_rule_toolwear
+  # false = a better model only becomes `challenger`; a person promotes it after the shadow
+  # week with `pm-pipeline promote --version N` (Assignment 1, trade-off T4).
+  auto_promote: false
